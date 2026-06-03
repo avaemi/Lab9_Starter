@@ -47,6 +47,14 @@
       width: 122px;
     }
   </style>
+
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({
+      token: "1557e45adacf47c1a207607153142a26"
+    
+    });
+  </script>
 </head>
 
 <body>
@@ -88,20 +96,105 @@
   </main>
 
   <script>
+    class ValidationError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'ValidationError';
+      }
+    }
+
+    class DivisionByZeroError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'DivisionByZeroError';
+      }
+    }
+
+    window.onerror = function(message, source, lineno, colno, error) {
+      console.log(`Global error caught: ${message} at line ${lineno}`);
+      return true;
+    };
+
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
       let output = document.querySelector('output');
-      let firstNum = document.querySelector('#first-num').value;
-      let secondNum = document.querySelector('#second-num').value;
-      let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      try {
+        let firstNum = parseFloat(document.querySelector('#first-num').value);
+        let secondNum = parseFloat(document.querySelector('#second-num').value);
+        let operator = document.querySelector('#operator').value;
+
+        if (isNaN(firstNum) || isNaN(secondNum)) {
+          throw new ValidationError('Inputs must be valid numbers');
+        }
+        if (operator === '/' && secondNum === 0) {
+          throw new DivisionByZeroError('Cannot divide by zero');
+        }
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      } catch (error) {
+        if (error instanceof ValidationError) {
+          output.innerHTML = 'Invalid input: ' + error.message;
+        } else if (error instanceof DivisionByZeroError) {
+          output.innerHTML = 'Error: ' + error.message;
+        } else {
+          output.innerHTML = 'An unknown error occurred';
+        }
+      }
+      finally {
+        console.log('Calculation attempted');
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
     // Start your code here
     // You may move this JS to another file if you wish
+    errorBtns[0].addEventListener('click', () => {
+      console.log('Console Log');
+    });
+    errorBtns[1].addEventListener('click', () => {
+      console.error('Console Error');
+    });
+    errorBtns[2].addEventListener('click', () => {
+      console.count('Console Count');
+    });
+    errorBtns[3].addEventListener('click', () => {
+      console.warn('Console Warn');
+    });
+    errorBtns[4].addEventListener('click', () => {
+      console.assert(1 === 2, 'Assertion failed');
+    });
+    errorBtns[5].addEventListener('click', () => {
+      console.clear();
+    });
+    errorBtns[6].addEventListener('click', () => {
+      console.dir(form);
+    });
+    errorBtns[7].addEventListener('click', () => {
+      console.dirxml(form);
+    });
+    errorBtns[8].addEventListener('click', () => {
+      console.group('Console Group Start');
+    });
+    errorBtns[9].addEventListener('click', () => {
+      console.groupEnd();
+    });
+    errorBtns[10].addEventListener('click', () => {
+      console.table(errorBtns);
+    });
+    errorBtns[11].addEventListener('click', () => {
+      console.time('myTimer');
+    });
+    errorBtns[12].addEventListener('click', () => {
+      console.timeEnd('myTimer');
+    });
+    errorBtns[13].addEventListener('click', () => {
+      console.trace('Console Trace');
+    });
+    errorBtns[14].addEventListener('click', () => {
+      // setTimeout pushes error outside the call stack → true global error → triggers window.onerror
+      setTimeout(() => { null.triggerGlobalError(); }, 0);
+    });
   </script>
 </body>
 
