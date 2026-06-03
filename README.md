@@ -7,3 +7,4 @@
 https://avaemi.github.io/Lab9_Starter/
 
 ## Screenshots
+![TrackJS Dashboard](trackjs.png)
